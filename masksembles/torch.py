@@ -40,7 +40,7 @@ class Masksembles2D(nn.Module):
 
         masks = common.generation_wrapper(channels, n, scale)
         masks = torch.from_numpy(masks)
-        self.masks = torch.nn.Parameter(masks, requires_grad=False).double()
+        self.masks = torch.nn.Parameter(masks, requires_grad=False).float()
 
     def forward(self, inputs):
         batch = inputs.shape[0]
@@ -89,7 +89,7 @@ class Masksembles1D(nn.Module):
 
         masks = common.generation_wrapper(channels, n, scale)
         masks = torch.from_numpy(masks)
-        self.masks = torch.nn.Parameter(masks, requires_grad=False).double()
+        self.masks = torch.nn.Parameter(masks, requires_grad=False).float()
 
     def forward(self, inputs):
         batch = inputs.shape[0]
