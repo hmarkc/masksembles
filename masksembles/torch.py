@@ -47,12 +47,15 @@ class Masksembles2D(nn.Module):
     def forward(self, inputs):
         batch = inputs.shape[0]
         if self.training:
+            if batch % self.n != 0:
+                raise ValueError('Batch size must be divisible by n, got batch {} and n {}'.format(batch, self.n))
             x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
             x = torch.cat(x, dim=1).permute([1, 0, 2, 3, 4])
             x = x * self.masks.unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
             x = torch.cat(torch.split(x, 1, dim=0), dim=1)
         else: 
             x = inputs * self.masks[self.cnt][None].unsqueeze(1).unsqueeze(-1).unsqueeze(-1) 
+            print("Sampling... Using mask: ", self.cnt)
             self.cnt = (self.cnt + 1) % self.n     
         return x.squeeze(0).float()
     
@@ -108,6 +111,8 @@ class Masksembles1D(nn.Module):
     def forward(self, inputs):
         batch = inputs.shape[0]
         if self.training:
+            if batch % self.n != 0:
+                raise ValueError('Batch size must be divisible by n, got batch {} and n {}'.format(batch, self.n))
             x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
             x = torch.cat(x, dim=1).permute([1, 0, 2])
             x = x * self.masks.unsqueeze(1)
