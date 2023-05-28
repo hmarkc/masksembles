@@ -3,9 +3,6 @@ from torch import nn
 
 from . import common
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-torch.set_default_tensor_type(device)
-
 class Masksembles2D(nn.Module):
     """
     :class:`Masksembles2D` is high-level class that implements Masksembles approach
@@ -41,14 +38,16 @@ class Masksembles2D(nn.Module):
         self.scale = scale
 
         masks = common.generation_wrapper(channels, n, scale)
-        masks = torch.from_numpy(masks)
+        masks = torch.from_numpy(masks).unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
         self.masks = torch.nn.Parameter(masks, requires_grad=False).float()
+        if torch.cuda.is_available():
+            self.masks = self.masks.cuda()
 
     def forward(self, inputs):
         batch = inputs.shape[0]
         x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
         x = torch.cat(x, dim=1).permute([1, 0, 2, 3, 4])
-        x = x * self.masks.unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
+        x = x * self.masks
         x = torch.cat(torch.split(x, 1, dim=0), dim=1)
         return x.squeeze(0).float()
     
@@ -95,14 +94,16 @@ class Masksembles1D(nn.Module):
         self.scale = scale
 
         masks = common.generation_wrapper(channels, n, scale)
-        masks = torch.from_numpy(masks)
+        masks = torch.from_numpy(masks).unsqueeze(1)
         self.masks = torch.nn.Parameter(masks, requires_grad=False).float() 
+        if torch.cuda.is_available():
+            self.masks = self.masks.cuda()
 
     def forward(self, inputs):
         batch = inputs.shape[0]
         x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
         x = torch.cat(x, dim=1).permute([1, 0, 2])
-        x = x * self.masks.unsqueeze(1)
+        x = x * self.masks
         x = torch.cat(torch.split(x, 1, dim=0), dim=1)
         return x.squeeze(0)
     
