@@ -49,6 +49,11 @@ class Masksembles2D(nn.Module):
         x = x * self.masks.unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
         x = torch.cat(torch.split(x, 1, dim=0), dim=1)
         return x.squeeze(0).float()
+    
+    def extra_repr(self):
+        return 'scale={}, n={}'.format(
+            self.scale, self.n
+        )
 
 
 class Masksembles1D(nn.Module):
@@ -98,3 +103,8 @@ class Masksembles1D(nn.Module):
         x = x * self.masks.unsqueeze(1)
         x = torch.cat(torch.split(x, 1, dim=0), dim=1)
         return x.squeeze(0)
+    
+    def extra_repr(self):
+        return 'scale={}, n={}'.format(
+            self.scale, self.n
+        )
