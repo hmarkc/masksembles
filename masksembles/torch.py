@@ -36,19 +36,24 @@ class Masksembles2D(nn.Module):
         self.channels = channels
         self.n = n
         self.scale = scale
+        self.cnt = 0
 
         masks = common.generation_wrapper(channels, n, scale)
-        masks = torch.from_numpy(masks).unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
+        masks = torch.from_numpy(masks)
         self.masks = torch.nn.Parameter(masks, requires_grad=False).float()
         if torch.cuda.is_available():
             self.masks = self.masks.cuda()
 
     def forward(self, inputs):
         batch = inputs.shape[0]
-        x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
-        x = torch.cat(x, dim=1).permute([1, 0, 2, 3, 4])
-        x = x * self.masks
-        x = torch.cat(torch.split(x, 1, dim=0), dim=1)
+        if self.train:
+            x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
+            x = torch.cat(x, dim=1).permute([1, 0, 2, 3, 4])
+            x = x * self.masks.unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
+            x = torch.cat(torch.split(x, 1, dim=0), dim=1)
+        else: 
+            x = input * self.masks[self.cnt][None].unsqueeze(1).unsqueeze(-1).unsqueeze(-1) 
+            self.cnt = (self.cnt + 1) % self.n     
         return x.squeeze(0).float()
     
     def extra_repr(self):
