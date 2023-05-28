@@ -46,7 +46,7 @@ class Masksembles2D(nn.Module):
 
     def forward(self, inputs):
         batch = inputs.shape[0]
-        if self.train:
+        if self.training:
             x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
             x = torch.cat(x, dim=1).permute([1, 0, 2, 3, 4])
             x = x * self.masks.unsqueeze(1).unsqueeze(-1).unsqueeze(-1)
@@ -107,7 +107,7 @@ class Masksembles1D(nn.Module):
 
     def forward(self, inputs):
         batch = inputs.shape[0]
-        if self.train:
+        if self.training:
             x = torch.split(inputs.unsqueeze(1), batch // self.n, dim=0)
             x = torch.cat(x, dim=1).permute([1, 0, 2])
             x = x * self.masks.unsqueeze(1)
