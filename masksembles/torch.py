@@ -39,8 +39,8 @@ class Masksembles2D(nn.Module):
         self.cnt = 0
 
         masks = common.generation_wrapper(channels, n, scale)
-        masks = torch.from_numpy(masks)
-        self.masks = torch.nn.Parameter(masks, requires_grad=False).float()
+        masks = torch.from_numpy(masks).float().to("cuda" if torch.cuda.is_available() else "cpu")
+        self.masks = torch.nn.Parameter(masks, requires_grad=False)
         if torch.cuda.is_available():
             self.masks = self.masks.cuda()
 
@@ -103,10 +103,8 @@ class Masksembles1D(nn.Module):
         self.cnt = 0
 
         masks = common.generation_wrapper(channels, n, scale)
-        masks = torch.from_numpy(masks)
-        self.masks = torch.nn.Parameter(masks, requires_grad=False).float() 
-        if torch.cuda.is_available():
-            self.masks = self.masks.cuda()
+        masks = torch.from_numpy(masks).float().to("cuda" if torch.cuda.is_available() else "cpu")
+        self.masks = torch.nn.Parameter(masks, requires_grad=False)
 
     def forward(self, inputs):
         batch = inputs.shape[0]
